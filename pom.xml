@@ -26,11 +26,11 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.cbt</groupId>
-    <artifactId>InfinitySystem</artifactId>
+    <artifactId>EquipeAlcance</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
-    <name>InfinitySystem</name>
-    <description>Systema de Lurk do grupo Infinity</description>
+    <name>EquipeAlcance</name>
+    <description>Systema de Lurk do grupo EquipeAlcance</description>
     <properties>
         <java.version>17</java.version>
     </properties>
