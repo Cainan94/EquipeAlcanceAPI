@@ -1,0 +1,35 @@
+name: Deploy Application EquipeAlcanceAPI Dev
+
+on:
+    push:
+        branches: [dev]
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout Code
+              uses: actions/checkout@v3
+
+            - name: Setup JAVA
+              uses: actions/setup-java@v3
+              with:
+                distribution: 'temurin'
+                java-version: '17'
+
+            - name: Build Project
+              run: mvn clean package -DskipTests
+#
+#            - name: Push Docker Image
+#              run: docker push cainanbt/infinity_api
+#
+#    deploy:
+#        needs: build
+#        runs-on: infinity-api
+#        steps:
+#          - name: Pull Image from Docker Hub
+#            run: docker pull cainanbt/infinity_api:latest
+#          - name: Remove old Container
+#            run: docker rm -f deploy_infinity_api
+#          - name: run docker container
+#            run: docker run -p 8080:8080 -d --name deploy_infinity_api cbtsoftware/deploy_infinity_api
