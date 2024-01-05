@@ -25,6 +25,8 @@ public class SecurityConfig {
     private final String[] PUBLIC = {
             "api/v1/user/login",
             "api/v1/update",
+            "api/v1/news/getAllNews",
+
     };
     private final String[] ADMSREQUESTS = {
             "api/v1/user/register",

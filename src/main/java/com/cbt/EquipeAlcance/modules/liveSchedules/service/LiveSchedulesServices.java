@@ -119,7 +119,7 @@ public class LiveSchedulesServices {
         List<Streamers> streamersList = streamersServices.getAllActive();
         cantMark.addAll(getAllStreamersSchedules(DateUtils.localDateTimeToEpoch(start)));
         cantMark.addAll(getAllStreamersSchedules(DateUtils.localDateTimeToEpoch(start.minusHours(24))));
-        //cantMark.forEach(streamersList::remove);
+        cantMark.forEach(streamersList::remove);
         return streamersList;
     }
 
@@ -236,19 +236,22 @@ public class LiveSchedulesServices {
         if(streamers.isEmpty()){
             throw new BadRequestException("Streamer não registrado.", "Falha ao consultar Agendamento");
         }
-
-        if (dtoRequest.getStartTime() < 1 || dtoRequest.getEndTime() < 1 || !hasPonctuaction(streamers.get().getIdPublic().toString(),dtoRequest.getStartTime()))
+        if (dtoRequest.getStartTime() < 1 || dtoRequest.getEndTime() < 1)
             throw new BadRequestException("Para realizar o agendamento é necessario informar horaio de inicio e fim.", "Falha ao registrar Agendamento");
         if(repository.findByStartTime(dtoRequest.getStartTime()).isPresent()){
             throw new BadRequestException("Horário já está ocupado.", "Falha ao registrar Agendamento");
+        }
+        if(!hasPonctuaction(streamers.get().getIdPublic().toString(),dtoRequest.getStartTime()) && !Security.isADM()){
+            throw new BadRequestException("Streamer não tem pontuação suficiente.", "Falha ao realizar Agendamento");
+        }
+        if(getAllStreamerCanMark(dtoRequest.getStartTime()).stream().filter(filter->filter.getTwitchName().equals(dtoRequest.getStreamersDTORequest().getTwitchName())).findFirst().isEmpty()){
+            throw new BadRequestException("Streamer não pode agendar devido as politicas do grupo", "Falha ao registrar Agendamento");
         }
         //realizar validações de regra de negocio
         /*  -horario livre?
             -streamer liberado (em caso de banimento temporario)
             -streamer póde agendar? (frequencia de agendamento)
          */
-
-
         return true;
     }
 
@@ -257,7 +260,7 @@ public class LiveSchedulesServices {
         long end = DateUtils.getEpochEndDayOf(start);
         Set<PonctuationTable> ponctuactions = ponctuationService.getListPonctuationUser(start,end,id);
         if(ponctuactions.isEmpty()){
-            throw new BadRequestException("Streamer não tem pontuação suficiente.", "Falha ao realizar Agendamento");
+            return false;
         }
         int userponctuaction = (int) ponctuactions.stream().toList().get(0).getPontuacaoes().get(0).getScore();
         long totalPonctuaction = repository.countByStartTimeGreaterThanEqualAndStartTimeLessThanEqualAndVisible(start,end,true) * 90;
@@ -269,7 +272,7 @@ public class LiveSchedulesServices {
         long porcent = (userponctuaction * 100L)/ totalPonctuaction;
 
         if(porcent < 35){
-            throw new BadRequestException("Streamer não tem pontuação suficiente.", "Falha ao realizar Agendamento");
+            return false;
         }
 
         return true;
