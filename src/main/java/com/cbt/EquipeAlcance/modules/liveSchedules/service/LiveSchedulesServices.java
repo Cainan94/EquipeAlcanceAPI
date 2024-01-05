@@ -137,7 +137,7 @@ public class LiveSchedulesServices {
     private boolean onWeekends(LocalDateTime start) {
         LocalDate date = DateUtils.epochToLocalDate(DateUtils.localDateTimeToEpoch(start));
         DayOfWeek d = date.getDayOfWeek();
-        return d == DayOfWeek.SATURDAY || d == DayOfWeek.SUNDAY || d == DayOfWeek.FRIDAY;
+        return d == DayOfWeek.SATURDAY || d == DayOfWeek.SUNDAY;
     }
 
     private List<LiveSchedule> getLiveScheduleByDay(long day, boolean isActive) {
