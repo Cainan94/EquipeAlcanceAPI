@@ -48,9 +48,4 @@ public class User {
     @ManyToOne(optional = false)
     private Roles role;
 
-    @Column
-    private String currentToken;
-
-
-
 }

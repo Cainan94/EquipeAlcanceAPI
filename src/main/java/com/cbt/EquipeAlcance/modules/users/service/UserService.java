@@ -56,12 +56,6 @@ public class UserService {
         var usernamePassword = new UsernamePasswordAuthenticationToken(dtoRequest.getUsername(), dtoRequest.getPassword());
         var auth = this.authenticationManager.authenticate(usernamePassword);
         var token = tokenService.generateToken((UserAuthenticate) auth.getPrincipal());
-        if(user.isPresent()){
-            if(user.get().getCurrentToken() != null && !StringUtils.isNullOrEmpty(user.get().getCurrentToken())){
-                var updateUser = UserDTORequest.setCurrentToken(user.get(),token);
-                this.doUpdate(updateUser);
-            }
-        }
         return UserDTOResponse.toDTO((UserAuthenticate) auth.getPrincipal(), token);
     }
 

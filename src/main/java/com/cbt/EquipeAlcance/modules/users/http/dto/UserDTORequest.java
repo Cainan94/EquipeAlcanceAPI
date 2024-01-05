@@ -26,7 +26,6 @@ public class UserDTORequest implements Serializable {
                 .password(user.getPassword())
                 .streamersRequestDTO(StreamersDTORequest.toDTO(user.getStreamers()))
                 .role(user.getRole().getRoleName())
-                .currentToken(user.getCurrentToken())
                 .build();
     }
 
