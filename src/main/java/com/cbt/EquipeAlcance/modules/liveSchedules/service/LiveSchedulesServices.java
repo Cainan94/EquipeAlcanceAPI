@@ -18,9 +18,11 @@ import com.cbt.EquipeAlcance.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class LiveSchedulesServices {
@@ -117,10 +119,25 @@ public class LiveSchedulesServices {
         LocalDateTime start = DateUtils.epochToLocalDateTime(DateUtils.getEpochStartDayOf(daySchedule));
         List<Streamers> cantMark = new ArrayList<>();
         List<Streamers> streamersList = streamersServices.getAllActive();
-        cantMark.addAll(getAllStreamersSchedules(DateUtils.localDateTimeToEpoch(start)));
-        cantMark.addAll(getAllStreamersSchedules(DateUtils.localDateTimeToEpoch(start.minusHours(24))));
+        if(onWeekends(start)){
+            cantMark.addAll(getAllStreamersSchedules(DateUtils.localDateTimeToEpoch(start.minusHours(24))));
+            for(Streamers str : getAllStreamersSchedules(DateUtils.localDateTimeToEpoch(start))){
+                if(getAllStreamersSchedules(DateUtils.localDateTimeToEpoch(start)).stream().filter(filter->filter.getTwitchName().equals(str.getTwitchName())).collect(Collectors.toList()).size()>1){
+                    cantMark.add(str);
+                }
+            }
+        }else{
+            cantMark.addAll(getAllStreamersSchedules(DateUtils.localDateTimeToEpoch(start)));
+            cantMark.addAll(getAllStreamersSchedules(DateUtils.localDateTimeToEpoch(start.minusHours(24))));
+        }
         cantMark.forEach(streamersList::remove);
         return streamersList;
+    }
+
+    private boolean onWeekends(LocalDateTime start) {
+        LocalDate date = DateUtils.epochToLocalDate(DateUtils.localDateTimeToEpoch(start));
+        DayOfWeek d = date.getDayOfWeek();
+        return d == DayOfWeek.SATURDAY || d == DayOfWeek.SUNDAY || d == DayOfWeek.FRIDAY;
     }
 
     private List<LiveSchedule> getLiveScheduleByDay(long day, boolean isActive) {
