@@ -146,7 +146,6 @@ public class LiveSchedulesServices {
         return repository.findByStartTimeGreaterThanEqualAndStartTimeLessThanEqualAndVisibleOrderByStartTime(start, end, isActive);
     }
 
-
     public List<Streamers> getAllStreamersSchedules(long daySchedule) {
         List<LiveSchedule> scheduleList = this.getLiveScheduleByDay(daySchedule, true);
         List<Streamers> streamersList = new ArrayList<>();
@@ -180,7 +179,7 @@ public class LiveSchedulesServices {
     public List<LiveScheduleTable> getAllAgendamentos(long start, long end, boolean isActive) {
         List<LiveSchedule> scheduleList = new ArrayList<>();
         List<LiveSchedule> schedules = new ArrayList<>();
-        for (long i = start; i < end; i = DateUtils.localDateTimeToEpoch(DateUtils.epochToLocalDateTime(i).plusHours(24).plusMinutes(59).plusSeconds(59))) {
+        for (long i = start; i < end; i = DateUtils.localDateTimeToEpoch(DateUtils.epochToLocalDateTime(i).plusHours(24).plusMinutes(0).plusSeconds(0))) {
             scheduleList.addAll(this.getLiveScheduleByDay(i, isActive));
         }
         if (scheduleList.isEmpty()) {
@@ -226,7 +225,7 @@ public class LiveSchedulesServices {
             List<LiveSchedule> listLives = repository.findByStartTimeGreaterThanEqualAndStartTimeLessThanEqualAndVisibleOrderByStartTime(start, end, isActive);
             List<LiveSchedule> schedules = new ArrayList<>();
             listLives.forEach(item -> {
-                if ((item.getStartTime() >= DateUtils.localDateTimeToEpoch(DateUtils.epochToLocalDateTime(start).minusHours(1).minusMinutes(30)) && item.getEndTime() <= DateUtils.localDateTimeToEpoch(DateUtils.epochToLocalDateTime(end).plusHours(1).plusMinutes(30))) && item.isVisible() == isActive) {
+                if ((item.getStartTime() >= DateUtils.localDateTimeToEpoch(DateUtils.epochToLocalDateTime(start).minusHours(1)) && item.getEndTime() <= DateUtils.localDateTimeToEpoch(DateUtils.epochToLocalDateTime(end).plusHours(1))) && item.isVisible() == isActive) {
                     schedules.add(item);
                 }
             });
@@ -337,8 +336,8 @@ public class LiveSchedulesServices {
         });
         List<AvailableHours> resultFilter = new ArrayList<>();
         repository.findByStartTimeGreaterThanEqualAndStartTimeLessThanEqualAndVisibleOrderByStartTime(start, end, true).forEach(schedule -> {
-            LocalDateTime scheduleDateStart = DateUtils.epochToLocalDateTime(schedule.getStartTime()).minusMinutes(90);
-            LocalDateTime scheduleDatEnd = DateUtils.epochToLocalDateTime(schedule.getStartTime()).plusMinutes(90);
+            LocalDateTime scheduleDateStart = DateUtils.epochToLocalDateTime(schedule.getStartTime()).minusMinutes(60);
+            LocalDateTime scheduleDatEnd = DateUtils.epochToLocalDateTime(schedule.getStartTime()).plusMinutes(60);
             allList.forEach(time -> {
                 int hora = Integer.parseInt(time.getValue().split(":")[0]);
                 int minuto = Integer.parseInt(time.getValue().split(":")[1]);
