@@ -82,10 +82,6 @@ public class LiveSchedulesServices {
 
     public LiveSchedule doUpdate(LiveSchedulesDTORequest dtoRequest) {
         try {
-            if(!Security.isADM()){
-                throw new BadRequestException("Seu usuário não tem privilégios para esta operação", "Falha de segurança");
-            }
-
             Optional<LiveSchedule> optionalLiveSchedule = repository.findByIdPublic(ID.toUUID(dtoRequest.getId()));
             Optional<Streamers> optionalStreamers = streamersServices.getByLogin(dtoRequest.getStreamersDTORequest().getTwitchName());
 
@@ -236,6 +232,9 @@ public class LiveSchedulesServices {
     }
 
     private boolean canUpdate(LiveSchedule liveSchedule, LiveSchedulesDTORequest dtoRequest) {
+        if(!Security.isADM()){
+            throw new BadRequestException("Seu usuário não tem privilégios para esta operação", "Falha de segurança");
+        }
         //realizar validações de regra de negocio
         /*  -horario livre?
             -streamer liberado (em caso de banimento temporario)
@@ -279,7 +278,7 @@ public class LiveSchedulesServices {
             return false;
         }
         int userponctuaction = (int) ponctuactions.stream().toList().get(0).getPontuacaoes().get(0).getScore();
-        long totalPonctuaction = repository.countByStartTimeGreaterThanEqualAndStartTimeLessThanEqualAndVisible(start,end,true) * 90;
+        long totalPonctuaction = repository.countByStartTimeGreaterThanEqualAndStartTimeLessThanEqualAndVisible(start,end,true) * 60;
 
         if(totalPonctuaction == 0){
             return true;
