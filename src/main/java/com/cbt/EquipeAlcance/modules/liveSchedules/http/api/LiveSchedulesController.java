@@ -4,12 +4,14 @@ import com.cbt.EquipeAlcance.modules.liveSchedules.adapters.AvailableHours;
 import com.cbt.EquipeAlcance.modules.liveSchedules.adapters.LiveScheduleTable;
 import com.cbt.EquipeAlcance.modules.liveSchedules.http.dto.LiveSchedulesDTORequest;
 import com.cbt.EquipeAlcance.modules.liveSchedules.http.dto.LiveSchedulesDTOResponse;
+import com.cbt.EquipeAlcance.modules.liveSchedules.model.LiveSchedule;
 import com.cbt.EquipeAlcance.modules.liveSchedules.service.LiveSchedulesServices;
 import com.cbt.EquipeAlcance.modules.streamers.http.dto.StreamersDTOResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -64,7 +66,11 @@ public class LiveSchedulesController {
     @GetMapping(value = "/AllScheduleOfDay/{daySchedule}")
     @CrossOrigin("*")
     public ResponseEntity<List<LiveSchedulesDTOResponse>>getAllSchdeuleOfDay(@PathVariable long daySchedule){
-        return ResponseEntity.ok(services.getScehduleOfDay(daySchedule).stream().map(LiveSchedulesDTOResponse::toDTO).collect(Collectors.toList()));
+        List<LiveSchedule> list = services.getScehduleOfDay(daySchedule);
+        if(list.size() > 0){
+            return ResponseEntity.ok(list.stream().map(LiveSchedulesDTOResponse::toDTO).collect(Collectors.toList()));
+        }
+        return ResponseEntity.ok(Collections.emptyList());
     }
 
     @GetMapping(value = "/getStreamersCamDoLive/{daySchedule}")
