@@ -132,18 +132,8 @@ public class StreamersServices {
             throw new BadRequestException("Streamer não registrado na base de dados.", "Falha ao deletar streamer");
         }
         Streamers s = optional.get();
-        return repository.save(Streamers.builder()
-                .id(s.getId())
-                .idPublic(s.getIdPublic())
-                .visible(false)
-                .deleted(true)
-                .dateCreate(s.getDateCreate())
-                .lastModificationDate(DateUtils.localDateTimeToEpoch(LocalDateTime.now()))
-                .twitchName(s.getTwitchName())
-                .birthday(s.getBirthday())
-                .isInLive(s.isInLive())
-                .lastTimeInLive(s.getLastTimeInLive())
-                .build());
+        repository.delete(s);
+        return s;
     }
 
     public Optional<Streamers> getByIdPublic(String id){
