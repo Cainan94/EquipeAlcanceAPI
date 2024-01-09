@@ -82,10 +82,6 @@ public class LiveSchedulesServices {
 
     public LiveSchedule doUpdate(LiveSchedulesDTORequest dtoRequest) {
         try {
-            if(!Security.isADM()){
-                throw new BadRequestException("Seu usuário não tem privilégios para esta operação", "Falha de segurança");
-            }
-
             Optional<LiveSchedule> optionalLiveSchedule = repository.findByIdPublic(ID.toUUID(dtoRequest.getId()));
             Optional<Streamers> optionalStreamers = streamersServices.getByLogin(dtoRequest.getStreamersDTORequest().getTwitchName());
 
@@ -119,6 +115,9 @@ public class LiveSchedulesServices {
         LocalDateTime start = DateUtils.epochToLocalDateTime(DateUtils.getEpochStartDayOf(daySchedule));
         List<Streamers> cantMark = new ArrayList<>();
         List<Streamers> streamersList = streamersServices.getAllActive();
+        if(Security.isADM()){
+         return streamersList;
+        }
         if(onWeekends(start)){
             cantMark.addAll(getAllStreamersSchedules(DateUtils.localDateTimeToEpoch(start.minusHours(24))));
             for(Streamers str : getAllStreamersSchedules(DateUtils.localDateTimeToEpoch(start))){
@@ -236,6 +235,9 @@ public class LiveSchedulesServices {
     }
 
     private boolean canUpdate(LiveSchedule liveSchedule, LiveSchedulesDTORequest dtoRequest) {
+        if(!Security.isADM()){
+            throw new BadRequestException("Seu usuário não tem privilégios para esta operação", "Falha de segurança");
+        }
         //realizar validações de regra de negocio
         /*  -horario livre?
             -streamer liberado (em caso de banimento temporario)
@@ -260,7 +262,7 @@ public class LiveSchedulesServices {
         if(!hasPonctuaction(streamers.get().getIdPublic().toString(),dtoRequest.getStartTime()) && !Security.isADM()){
             throw new BadRequestException("Streamer não tem pontuação suficiente.", "Falha ao realizar Agendamento");
         }
-        if(getAllStreamerCanMark(dtoRequest.getStartTime()).stream().filter(filter->filter.getTwitchName().equals(dtoRequest.getStreamersDTORequest().getTwitchName())).findFirst().isEmpty()){
+        if(getAllStreamerCanMark(dtoRequest.getStartTime()).stream().filter(filter->filter.getTwitchName().equals(dtoRequest.getStreamersDTORequest().getTwitchName())).findFirst().isEmpty() && !Security.isADM()){
             throw new BadRequestException("Streamer não pode agendar devido as politicas do grupo", "Falha ao registrar Agendamento");
         }
         //realizar validações de regra de negocio
@@ -279,7 +281,7 @@ public class LiveSchedulesServices {
             return false;
         }
         int userponctuaction = (int) ponctuactions.stream().toList().get(0).getPontuacaoes().get(0).getScore();
-        long totalPonctuaction = repository.countByStartTimeGreaterThanEqualAndStartTimeLessThanEqualAndVisible(start,end,true) * 90;
+        long totalPonctuaction = repository.countByStartTimeGreaterThanEqualAndStartTimeLessThanEqualAndVisible(start,end,true) * 60;
 
         if(totalPonctuaction == 0){
             return true;
@@ -299,7 +301,11 @@ public class LiveSchedulesServices {
         if(streamer.isEmpty()){
             throw new BadRequestException("Streamer não registrado.", "Falha ao consultar Agendamento");
         }
-        return repository.findFirstByStreamerOrderByStartTimeDesc(streamer.get()).get();
+        Optional<LiveSchedule> optional = repository.findFirstByStreamerOrderByStartTimeDesc(streamer.get());
+        if(optional.isEmpty()){
+            return new LiveSchedule();
+        }
+        return optional.get();
     }
 
     public List<AvailableHours> getAvailableHours(long day) {
