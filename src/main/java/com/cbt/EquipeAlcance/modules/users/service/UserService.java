@@ -183,20 +183,8 @@ public class UserService {
             }
 
             StreamersDTORequest streamersDTORequest = StreamersDTORequest.builder().build();
-
-            repository.save(User.builder()
-                    .id(userOptional.get().getId())
-                    .idPublic(userOptional.get().getIdPublic())
-                    .visible(false)
-                    .deleted(true)
-                    .dateCreate(userOptional.get().getDateCreate())
-                    .lastModificationDate(userOptional.get().getLastModificationDate())
-                    .username(userOptional.get().getUsername())
-                    .password(userOptional.get().getPassword())
-                    .streamers(streamersServices.delete(userOptional.get().getStreamers().getIdPublic()))
-                    .role(userOptional.get().getRole())
-                    .build());
-
+            streamersServices.delete(userOptional.get().getStreamers().getIdPublic());
+            repository.delete(userOptional.get());
             return true;
         } catch (Exception e) {
             throw new BadRequestException(e.getMessage(), "Falha critica ao deletar usuário");
