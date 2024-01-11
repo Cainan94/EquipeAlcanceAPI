@@ -20,7 +20,7 @@ public class UpdateModelController {
         return ResponseEntity.ok(UpdateModelDTOResponse.toDTO(service.getCurrentVersion()));
     }
 
-    @PostMapping()
+    @PostMapping("/newVersion")
     @CrossOrigin("*")
     public ResponseEntity<UpdateModelDTOResponse> setNewVersion( @RequestBody UpdateModelDTORequest request){
         return ResponseEntity.ok(UpdateModelDTOResponse.toDTO(service.insertVersion(request)));

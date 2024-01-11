@@ -28,16 +28,6 @@ public class SecurityConfig {
             "api/v1/news/getAllNews",
 
     };
-    private final String[] ADMSREQUESTS = {
-            "api/v1/user/register",
-            "api/v1/user/update",
-            "api/v1/user/delete",
-            "api/v1/streamers/getAllActive",
-            "api/v1/ponctuation/getAllPonctuationByPeriod/**",
-            "api/v1/liveSchedules/register",
-            "api/v1/liveSchedules/update",
-            "api/v1/liveSchedules/delete/**",
-    };
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {

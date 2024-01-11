@@ -19,7 +19,7 @@ public class UpdateModelDTOResponse {
                 .id(model.getIdPublic().toString())
                 .version(model.getVersion())
                 .urlDownload(model.getUrlDownload())
-//                .noteUpdate(model.getNoteUpdate())
+                .noteUpdate(model.getNoteUpdate())
                 .build();
     }
 }
