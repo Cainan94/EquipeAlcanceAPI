@@ -27,8 +27,8 @@ public class UpdateModel {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String urlDownload;
 
-//    @Column(nullable = false)
-//    private String noteUpdate;
+    @Column(columnDefinition = "TEXT")
+    private String noteUpdate;
 
     @Column(nullable = false)
     private UUID idPublic;

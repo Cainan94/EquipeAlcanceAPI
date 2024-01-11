@@ -140,7 +140,7 @@ public class LiveSchedulesServices {
     }
 
     private List<LiveSchedule> getLiveScheduleByDay(long day, boolean isActive) {
-        Long start = DateUtils.getEpochStartDayOf(day);
+            Long start = DateUtils.getEpochStartDayOf(day);
         long end = DateUtils.localDateTimeToEpoch(DateUtils.epochToLocalDateTime(start).plusHours(23).plusMinutes(59));
         return repository.findByStartTimeGreaterThanEqualAndStartTimeLessThanEqualAndVisibleOrderByStartTime(start, end, isActive);
     }

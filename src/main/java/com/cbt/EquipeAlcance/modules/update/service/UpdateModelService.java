@@ -19,13 +19,13 @@ public class UpdateModelService {
     @Autowired
     private UpdateModelRepository repository;
 
-    public UpdateModel getCurrentVersion(){
-        Optional<UpdateModel> optional =  repository.findByVisible(true);
+    public UpdateModel getCurrentVersion() {
+        Optional<UpdateModel> optional = repository.findByVisible(true);
         return optional.orElseGet(UpdateModel::new);
     }
 
     public UpdateModel insertVersion(UpdateModelDTORequest request) {
-        if(!Security.isADM()){
+        if (!Security.isADM()) {
             throw new BadRequestException("Seu usuário não tem privilégios para esta operação", "Falha de segurança");
         }
         Optional<UpdateModel> optionalVersion = repository.findByVisible(true);
@@ -39,6 +39,7 @@ public class UpdateModelService {
                 .visible(true)
                 .deleted(false)
                 .version(request.getVersion())
+                .noteUpdate(request.getNoteUpdate())
                 .build());
     }
 }
