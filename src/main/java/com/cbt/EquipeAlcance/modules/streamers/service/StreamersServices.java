@@ -123,11 +123,11 @@ public class StreamersServices {
     }
 
     @Transactional
-    public Streamers delete(UUID id) {
+    public Streamers delete(String findByTwitchName) {
         if(!Security.isADM()){
             throw new BadRequestException("Seu usuário não tem privilégios para esta operação", "Falha de segurança");
         }
-        Optional<Streamers> optional = repository.findByIdPublic(id);
+        Optional<Streamers> optional = repository.findByTwitchName(findByTwitchName);
         if (optional.isEmpty()) {
             throw new BadRequestException("Streamer não registrado na base de dados.", "Falha ao deletar streamer");
         }

@@ -5,6 +5,8 @@ import com.cbt.EquipeAlcance.modules.roles.model.Roles;
 import com.cbt.EquipeAlcance.modules.streamers.model.Streamers;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.UUID;
 
@@ -40,8 +42,8 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "streamer_id")
-    @OneToOne(optional = false)
     private Streamers streamers;
 
     @JoinColumn(name="role_id")

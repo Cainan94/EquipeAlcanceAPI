@@ -3,6 +3,8 @@ package com.cbt.EquipeAlcance.modules.liveSchedules.model;
 import com.cbt.EquipeAlcance.modules.streamers.model.Streamers;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.UUID;
 
@@ -33,7 +35,7 @@ public class LiveSchedule {
     @Column
     private Long endTime;
 
-    @ManyToOne
+    @ManyToOne()
     @JoinColumn(name = "streamer_id")
     private Streamers streamer;
 }

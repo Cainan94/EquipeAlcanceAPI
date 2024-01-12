@@ -19,4 +19,6 @@ public interface LiveSchedulesRepository extends JpaRepository<LiveSchedule, UUI
     Optional<LiveSchedule> findByStartTime(Long startTime);
 
     long countByStartTimeGreaterThanEqualAndStartTimeLessThanEqualAndVisible(long start, long end, boolean visible);
+
+    List<LiveSchedule>findByStreamer(Streamers streamers);
 }

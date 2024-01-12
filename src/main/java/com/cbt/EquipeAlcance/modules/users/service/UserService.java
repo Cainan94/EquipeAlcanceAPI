@@ -2,9 +2,12 @@ package com.cbt.EquipeAlcance.modules.users.service;
 
 import com.cbt.EquipeAlcance.infra.errors.exceptions.BadRequestException;
 import com.cbt.EquipeAlcance.infra.security.TokenService;
+import com.cbt.EquipeAlcance.modules.liveSchedules.http.dto.LiveSchedulesDTORequest;
+import com.cbt.EquipeAlcance.modules.liveSchedules.service.LiveSchedulesServices;
 import com.cbt.EquipeAlcance.modules.roles.model.Roles;
 import com.cbt.EquipeAlcance.modules.roles.service.RoleService;
 import com.cbt.EquipeAlcance.modules.streamers.http.dto.StreamersDTORequest;
+import com.cbt.EquipeAlcance.modules.streamers.model.Streamers;
 import com.cbt.EquipeAlcance.modules.streamers.service.StreamersServices;
 import com.cbt.EquipeAlcance.modules.users.http.dto.UserAuthenticate;
 import com.cbt.EquipeAlcance.modules.users.http.dto.UserDTORequest;
@@ -36,7 +39,7 @@ public class UserService {
     private UsersRepository repository;
 
     @Autowired
-    private StreamersServices streamersServices;
+    private LiveSchedulesServices liveSchedulesServices;
 
     @Autowired
     private RoleService roleService;
@@ -87,7 +90,7 @@ public class UserService {
                     .password(UpdatePassword(dtoRequest, userOptional.get()))
                     .lastModificationDate(DateUtils.localDateTimeToEpoch(LocalDateTime.now()))
                     .role(setRole(dtoRequest.getRole()))
-                    .streamers(streamersServices.doUpdate(StreamersDTORequest.builder()
+                    .streamers(liveSchedulesServices.updateStreamer(StreamersDTORequest.builder()
                             .birthday(dtoRequest.getStreamersRequestDTO().getBirthday())
                             .twitchName(dtoRequest.getUsername())
                             .id(dtoRequest.getStreamersRequestDTO().getId())
@@ -133,11 +136,11 @@ public class UserService {
                         .deleted(false)
                         .dateCreate(DateUtils.localDateTimeToEpoch(LocalDateTime.now()))
                         .lastModificationDate(0l)
-                        .username(dtoRequest.getUsername())
+                        .username(dtoRequest.getUsername().trim())
                         .password(new BCryptPasswordEncoder().encode(dtoRequest.getPassword()))
-                        .streamers(streamersServices.doRegister(StreamersDTORequest.builder()
+                        .streamers(liveSchedulesServices.insertStreamer(StreamersDTORequest.builder()
                                 .birthday(dtoRequest.getStreamersRequestDTO().getBirthday())
-                                .twitchName(dtoRequest.getUsername())
+                                .twitchName(dtoRequest.getUsername().trim())
                                 .build()))
                         .role(setRole(dtoRequest.getRole()))
                         .build());
@@ -181,9 +184,14 @@ public class UserService {
             if (userOptional.isEmpty()) {
                 throw new BadRequestException("Usuário não registrado na base de dados.", "Falha ao deletar usuário");
             }
+            liveSchedulesServices.getAllPonctuactionByStreamer(userOptional.get().getStreamers()).forEach(ponto->{
+                liveSchedulesServices.delete(ponto.getIdPublic());
+            });
 
-            StreamersDTORequest streamersDTORequest = StreamersDTORequest.builder().build();
-            streamersServices.delete(userOptional.get().getStreamers().getIdPublic());
+            liveSchedulesServices.gelAllScheduleByStreamer(userOptional.get().getStreamers()).forEach(schedule->{
+                liveSchedulesServices.delete(schedule.getIdPublic().toString());
+            });
+
             repository.delete(userOptional.get());
             return true;
         } catch (Exception e) {

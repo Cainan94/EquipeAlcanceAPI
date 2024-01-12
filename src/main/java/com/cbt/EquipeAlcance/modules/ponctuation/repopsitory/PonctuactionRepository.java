@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -17,4 +18,6 @@ public interface PonctuactionRepository extends JpaRepository<Ponctuation,UUID> 
     List<Ponctuation> findByDateGreaterThanEqualAndDateLessThanEqualAndStreamersOrderByDateCreate(long start, long end,Streamers streamers);
 
     List<Ponctuation> findByStreamers(Streamers streamers);
+
+    Optional<Ponctuation> findByIdPublic(UUID id);
 }
