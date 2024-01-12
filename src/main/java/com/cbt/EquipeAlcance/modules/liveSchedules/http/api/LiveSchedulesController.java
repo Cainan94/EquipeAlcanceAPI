@@ -6,6 +6,7 @@ import com.cbt.EquipeAlcance.modules.liveSchedules.http.dto.LiveSchedulesDTORequ
 import com.cbt.EquipeAlcance.modules.liveSchedules.http.dto.LiveSchedulesDTOResponse;
 import com.cbt.EquipeAlcance.modules.liveSchedules.model.LiveSchedule;
 import com.cbt.EquipeAlcance.modules.liveSchedules.service.LiveSchedulesServices;
+import com.cbt.EquipeAlcance.modules.ponctuation.http.adapters.PonctuationTable;
 import com.cbt.EquipeAlcance.modules.streamers.http.dto.StreamersDTOResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -103,5 +104,16 @@ public class LiveSchedulesController {
         return ResponseEntity.ok(LiveSchedulesDTOResponse.toDTO(services.getLastScheduleUser(id)));
     }
 
+    @GetMapping("/getAllPonctuationByPeriod/{start}/{end}")
+    @CrossOrigin("*")
+    public ResponseEntity<List<PonctuationTable>> getAllPonctuationByPeriod(@PathVariable long start, @PathVariable long end) {
+        return ResponseEntity.ok(services.getListPonctuation(start, end));
+    }
+
+    @GetMapping("/getAllPonctuationByPeriodAndUser/{start}/{end}/{id}")
+    @CrossOrigin("*")
+    public ResponseEntity<List<PonctuationTable>> getAllPonctuationByPeriodAndId(@PathVariable long start, @PathVariable long end, @PathVariable String id) {
+        return ResponseEntity.ok(services.getListPonctuationUser(start, end,id));
+    }
 
 }

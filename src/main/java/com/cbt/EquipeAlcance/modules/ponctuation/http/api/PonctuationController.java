@@ -18,20 +18,7 @@ public class PonctuationController {
     private PonctuationService ponctuationService;
 
     @PostMapping("/registerPonctuation")
-    public ResponseEntity<PonctuationDTOResponse> setPonctuation(@RequestBody PonctuationDTORequest dtoRequest) {
+        public ResponseEntity<PonctuationDTOResponse> setPonctuation(@RequestBody PonctuationDTORequest dtoRequest) {
         return ResponseEntity.ok(PonctuationDTOResponse.toDTO(ponctuationService.newPonctuation(dtoRequest)));
     }
-
-    @GetMapping("/getAllPonctuationByPeriod/{start}/{end}")
-    @CrossOrigin("*")
-    public ResponseEntity<Set<PonctuationTable>> getAllPonctuationByPeriod(@PathVariable long start, @PathVariable long end) {
-        return ResponseEntity.ok(ponctuationService.getListPonctuation(start, end));
-    }
-
-    @GetMapping("/getAllPonctuationByPeriodAndUser/{start}/{end}/{id}")
-    @CrossOrigin("*")
-    public ResponseEntity<Set<PonctuationTable>> getAllPonctuationByPeriodAndId(@PathVariable long start, @PathVariable long end, @PathVariable String id) {
-        return ResponseEntity.ok(ponctuationService.getListPonctuationUser(start, end,id));
-    }
-
 }
