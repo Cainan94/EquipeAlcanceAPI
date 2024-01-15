@@ -278,7 +278,7 @@ public class LiveSchedulesServices {
     }
 
     private boolean hasPonctuaction(String id, long startTime) {
-        long start = DateUtils.getEpochStartDayOf(DateUtils.localDateTimeToEpoch(DateUtils.epochToLocalDateTime(startTime).minusDays(1)));
+            long start = DateUtils.getEpochStartDayOf(DateUtils.localDateTimeToEpoch(DateUtils.epochToLocalDateTime(startTime).minusDays(1)));
         long end = DateUtils.getEpochEndDayOf(start);
         List<PonctuationTable> ponctuactions = getListPonctuationUser(start,end,id);
         if(ponctuactions.isEmpty()){
@@ -293,7 +293,7 @@ public class LiveSchedulesServices {
 
         long porcent = (userponctuaction * 100L)/ totalPonctuaction;
 
-        if(porcent < 35){
+        if(userponctuaction < 35){
             return false;
         }
 
