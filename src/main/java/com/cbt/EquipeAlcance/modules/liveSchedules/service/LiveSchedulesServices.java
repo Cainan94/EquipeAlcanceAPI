@@ -376,145 +376,156 @@ public class LiveSchedulesServices {
         return allList;
     }
 
-    public List<PonctuationTable>getListPonctuation(long start, long end){
-        long startDay = DateUtils.getEpochStartDayOf(start);
-        long endDay = DateUtils.getEpochEndDayOf(DateUtils.getEpochStartDayOf(DateUtils.getEpochEndDayOf(end)));
-
-        List<Ponctuation> ponctuationList= ponctuationService.getAllPonctuactionByPeriod(startDay,endDay);
-
-        if(ponctuationList.isEmpty()){
+    private List<PonctuationTable> makePonctuationTable(long start, long end) {
+        List<Ponctuation> ponctuationList = ponctuationService.getAllPonctuactionByPeriod(start, end);
+        if (ponctuationList.isEmpty()) {
             return Collections.emptyList();
         }
 
-        long totalPonctuaction = repository.countByStartTimeGreaterThanEqualAndStartTimeLessThanEqualAndVisible(start, end, true) * 90;
+        long totalPonctuaction = repository.countByStartTimeGreaterThanEqualAndStartTimeLessThanEqualAndVisible(start, end, true) * 60;
 
-        if(totalPonctuaction == 0){
+        if (totalPonctuaction == 0) {
             return Collections.emptyList();
         }
+
+        List<Streamers> streamersList = streamersServices.getAllActive();
 
         List<PonctuationTable> ponctuationTableList = new ArrayList<>();
-        Set<PonctuationDTOResponse> ponctuationDTOResponses = new HashSet<>();
+        List<PonctuationDTOResponse> ponctuationDTOResponses = new ArrayList<>();
         PonctuationTable ponctuationTable = new PonctuationTable();
-
-        long date = ponctuationList.get(0).getDate();
-        Ponctuation p = ponctuationList.get(0);
-        ponctuationTable.setDate(DateUtils.localDateToString(DateUtils.epochToLocalDate(date)));
-        float total = 0f;
-
-        for (Ponctuation ponctuation : ponctuationList) {
-            if(DateUtils.getEpochStartDayOf(date)==DateUtils.getEpochStartDayOf(ponctuation.getDate())){
-
-                if(p.getStreamers().getTwitchName().equals(ponctuation.getStreamers().getTwitchName())){
-
-                    total+=ponctuation.getScore();
-
-                }else{
-
-                    ponctuationDTOResponses.add(PonctuationDTOResponse.builder()
-                            .score((total * 100L) / totalPonctuaction)
-                            .streamer(StreamersDTOResponse.toDTO(p.getStreamers()))
-                            .build());
-                    p = ponctuation;
-                    total = 0f;
-                    total+=ponctuation.getScore();
-                }
-
-            }else{
+        ponctuationTable.setDate(DateUtils.localDateToString(DateUtils.epochToLocalDate(ponctuationList.get(0).getDate())));
+        for (var streamer : streamersList) {
+            float total = 0f;
+            var pontos = ponctuationList.stream().filter(filter -> filter.getStreamers().getTwitchName().equals(streamer.getTwitchName())).toList();
+            for (var ponto : pontos) {
+                total += ponto.getScore();
+                ponctuationList.remove(ponto);
+            }
+            if (total > 0) {
                 ponctuationDTOResponses.add(PonctuationDTOResponse.builder()
                         .score((total * 100L) / totalPonctuaction)
-                        .streamer(StreamersDTOResponse.toDTO(p.getStreamers()))
+                        .streamer(StreamersDTOResponse.toDTO(streamer))
                         .build());
-                total = 0f;
-                ponctuationTable.getPontuacaoes().addAll(ponctuationDTOResponses);
-                ponctuationDTOResponses = new HashSet<>();
-                ponctuationTableList.add(ponctuationTable);
-                ponctuationTable = new PonctuationTable();
-                date = ponctuation.getDate();
-                ponctuationTable.setDate(DateUtils.localDateToString(DateUtils.epochToLocalDate(date)));
-
-                if(p.getStreamers().getTwitchName().equals(ponctuation.getStreamers().getTwitchName())){
-
-                    total+=ponctuation.getScore();
-
-                }else{
-
-                    ponctuationDTOResponses.add(PonctuationDTOResponse.builder()
-                            .score((total * 100L) / totalPonctuaction)
-                            .streamer(StreamersDTOResponse.toDTO(p.getStreamers()))
-                            .build());
-                    p = ponctuation;
-                    total = 0f;
-                    total+=ponctuation.getScore();
-                }
             }
         }
-        ponctuationDTOResponses.add(PonctuationDTOResponse.builder()
-                .score((total * 100L) / totalPonctuaction)
-                .streamer(StreamersDTOResponse.toDTO(p.getStreamers()))
-                .build());
-        total = 0f;
-        ponctuationTable.getPontuacaoes().addAll(ponctuationDTOResponses);
+        ponctuationTable.setPontuacaoes(ponctuationDTOResponses);
         ponctuationTableList.add(ponctuationTable);
-
         return ponctuationTableList;
-
     }
 
-    public List<PonctuationTable>getListPonctuationUser(long start, long end,String id){
-        Optional<Streamers> streamersOptional = streamersServices.getByIdPublic(id);
-        if(streamersOptional.isEmpty()){
-            throw new BadRequestException("Usuário não registrado no sistema","Falha ao consultar pontuação");
-        }
+    private List<PonctuationTable> makePonctuationTableByUser(long start, long end, Streamers streamer) {
+        List<Ponctuation> ponctuationList = ponctuationService.getAllPonctuactionByPeriod(start, end);
 
-        long startDay = DateUtils.getEpochStartDayOf(start);
-        long endDay = DateUtils.getEpochEndDayOf(DateUtils.getEpochStartDayOf(DateUtils.getEpochEndDayOf(end)));
-
-        List<Ponctuation> ponctuationList= ponctuationService.getAllPonctuactionByPeriodStreamer(startDay,endDay,streamersOptional.get());
-
-        if(ponctuationList.isEmpty()){
+        if (ponctuationList.isEmpty()) {
             return Collections.emptyList();
         }
 
-        long totalPonctuaction = repository.countByStartTimeGreaterThanEqualAndStartTimeLessThanEqualAndVisible(start, end, true) * 90;
+        long totalPonctuaction = repository.countByStartTimeGreaterThanEqualAndStartTimeLessThanEqualAndVisible(start, end, true) * 60;
 
-        if(totalPonctuaction == 0){
+        if (totalPonctuaction == 0) {
+            return Collections.emptyList();
+        }
+        var pontos = ponctuationList.stream().filter(filter -> filter.getStreamers().getTwitchName().equals(streamer.getTwitchName())).toList();
+        if(pontos.isEmpty()){
             return Collections.emptyList();
         }
 
         List<PonctuationTable> ponctuationTableList = new ArrayList<>();
         List<PonctuationDTOResponse> ponctuationDTOResponses = new ArrayList<>();
         PonctuationTable ponctuationTable = new PonctuationTable();
-
-        long date = ponctuationList.get(0).getDate();
-        Ponctuation p = ponctuationList.get(0);
-        ponctuationTable.setDate(DateUtils.localDateToString(DateUtils.epochToLocalDate(date)));
+        ponctuationTable.setDate(DateUtils.localDateToString(DateUtils.epochToLocalDate(ponctuationList.get(0).getDate())));
         float total = 0f;
-
-        for (Ponctuation ponctuation : ponctuationList){
-            if(DateUtils.getEpochStartDayOf(date)==DateUtils.getEpochStartDayOf(ponctuation.getDate())){
-                total+=ponctuation.getScore();
-            }else{
-                ponctuationDTOResponses.add(PonctuationDTOResponse.builder()
-                        .score((total * 100L) / totalPonctuaction)
-                        .streamer(StreamersDTOResponse.toDTO(p.getStreamers()))
-                        .build());
-                total = 0f;
-                ponctuationTable.getPontuacaoes().addAll(ponctuationDTOResponses);
-                ponctuationDTOResponses = new ArrayList<>();
-                ponctuationTableList.add(ponctuationTable);
-                ponctuationTable = new PonctuationTable();
-                date = ponctuation.getDate();
-                ponctuationTable.setDate(DateUtils.localDateToString(DateUtils.epochToLocalDate(date)));
-            }
+        for (var ponto : pontos) {
+            total += ponto.getScore();
         }
-        ponctuationDTOResponses.add(PonctuationDTOResponse.builder()
-                .score((total * 100L) / totalPonctuaction)
-                .streamer(StreamersDTOResponse.toDTO(p.getStreamers()))
-                .build());
-        total = 0f;
-        ponctuationTable.getPontuacaoes().addAll(ponctuationDTOResponses);
+        if (total > 0) {
+            ponctuationDTOResponses.add(PonctuationDTOResponse.builder()
+                    .score((total * 100L) / totalPonctuaction)
+                    .streamer(StreamersDTOResponse.toDTO(streamer))
+                    .build());
+        }
+        ponctuationTable.setPontuacaoes(ponctuationDTOResponses);
         ponctuationTableList.add(ponctuationTable);
         return ponctuationTableList;
+    }
+
+    public List<PonctuationTable> getListPonctuation(long start, long end) {
+        long startDay = DateUtils.getEpochStartDayOf(start);
+        long endDay = DateUtils.getEpochEndDayOf(DateUtils.getEpochStartDayOf(end));
+
+        long start_ = startDay;
+        long end_ = DateUtils.getEpochEndDayOf(start_);
+        List<PonctuationTable> result = new ArrayList<>();
+
+        while (end_ <= endDay) {
+            result.addAll(makePonctuationTable(start_, end_));
+            start_ = DateUtils.getEpochStartDayOf(DateUtils.localDateTimeToEpoch(DateUtils.epochToLocalDateTime(start_).plusHours(24)));
+            end_ = DateUtils.getEpochEndDayOf(start_);
+        }
+        List<PonctuationTable> listEmpty = result.stream().filter(filter->filter.getPontuacaoes().isEmpty()).toList();
+        listEmpty.forEach(result::remove);
+        result.forEach(item->{
+            Collections.sort(item.getPontuacaoes());
+        });
+        return result;
+    }
+
+    public List<PonctuationTable> getListPonctuationUser(long start, long end, String id) {
+        Optional<Streamers> streamersOptional = streamersServices.getByIdPublic(id);
+        if (streamersOptional.isEmpty()) {
+            throw new BadRequestException("Usuário não registrado no sistema", "Falha ao consultar pontuação");
+        }
+
+        long startDay = DateUtils.getEpochStartDayOf(start);
+        long endDay = DateUtils.getEpochEndDayOf(DateUtils.getEpochStartDayOf(end));
+
+        long start_ = startDay;
+        long end_ = DateUtils.getEpochEndDayOf(start_);
+        List<PonctuationTable> result = new ArrayList<>();
+
+        while (end_ <= endDay) {
+            result.addAll(makePonctuationTableByUser(start_, end_, streamersOptional.get()));
+            start_ = DateUtils.getEpochStartDayOf(DateUtils.localDateTimeToEpoch(DateUtils.epochToLocalDateTime(start_).plusHours(24)));
+            end_ = DateUtils.getEpochEndDayOf(start_);
+        }
+        List<PonctuationTable> listEmpty = result.stream().filter(filter->filter.getPontuacaoes().isEmpty()).toList();
+        listEmpty.forEach(result::remove);
+
+        return result;
+    }
+
+    public List<PonctuationDTOResponse> getListTopStreamers(long start, long end){
+        long startDay = DateUtils.getEpochStartDayOf(start);
+        long endDay = DateUtils.getEpochEndDayOf(DateUtils.getEpochStartDayOf(end));
+        List<Ponctuation> ponctuationList = ponctuationService.getAllPonctuactionByPeriod(startDay, endDay);
+        List<PonctuationDTOResponse> ponctuationDTOResponses = new ArrayList<>();
+        if (ponctuationList.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        long totalPonctuaction = repository.countByStartTimeGreaterThanEqualAndStartTimeLessThanEqualAndVisible(start, end, true) * 60;
+
+        if (totalPonctuaction == 0) {
+            return Collections.emptyList();
+        }
+
+        List<Streamers> streamersList = streamersServices.getAllActive();
+
+        for (var streamer : streamersList) {
+            float total = 0f;
+            var pontos = ponctuationList.stream().filter(filter -> filter.getStreamers().getTwitchName().equals(streamer.getTwitchName())).toList();
+            for (var ponto : pontos) {
+                total += ponto.getScore();
+            }
+            if (total > 0) {
+                ponctuationDTOResponses.add(PonctuationDTOResponse.builder()
+                        .score((total * 100L) / totalPonctuaction)
+                        .streamer(StreamersDTOResponse.toDTO(streamer))
+                        .build());
+            }
+        }
+        Collections.sort(ponctuationDTOResponses);
+        return ponctuationDTOResponses;
     }
 
     public List<LiveSchedule>gelAllScheduleByStreamer(Streamers str){

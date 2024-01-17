@@ -50,7 +50,7 @@ public interface DateUtils {
 
     static long getEpochEndDayOf(long daySchedule) {
         LocalDateTime date = epochToLocalDateTime(getEpochStartDayOf(daySchedule));
-        date = date.plusHours(23).plusMinutes(59).plusSeconds(59);
+        date = date.plusHours(23).plusMinutes(59).plusSeconds(59).plusNanos(999);
         return localDateTimeToEpoch(date);
     }
 }
