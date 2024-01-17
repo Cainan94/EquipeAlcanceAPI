@@ -9,7 +9,7 @@ import lombok.*;
 @Getter
 @Setter
 @Builder
-public class PonctuationDTOResponse {
+public class PonctuationDTOResponse implements Comparable<PonctuationDTOResponse>{
     private String id;
     private float score;
     private boolean isregistered;
@@ -24,5 +24,16 @@ public class PonctuationDTOResponse {
                 .date(entity.getDate())
                 .streamer(StreamersDTOResponse.toDTO(entity.getStreamers()))
                 .build();
+    }
+
+    @Override
+    public int compareTo(PonctuationDTOResponse o) {
+        if(score > o.score){
+            return -1;
+        }if(score < o.score){
+            return 1;
+        }else{
+            return 0;
+        }
     }
 }

@@ -7,6 +7,7 @@ import com.cbt.EquipeAlcance.modules.liveSchedules.http.dto.LiveSchedulesDTOResp
 import com.cbt.EquipeAlcance.modules.liveSchedules.model.LiveSchedule;
 import com.cbt.EquipeAlcance.modules.liveSchedules.service.LiveSchedulesServices;
 import com.cbt.EquipeAlcance.modules.ponctuation.http.adapters.PonctuationTable;
+import com.cbt.EquipeAlcance.modules.ponctuation.http.dto.PonctuationDTOResponse;
 import com.cbt.EquipeAlcance.modules.streamers.http.dto.StreamersDTOResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -116,4 +117,9 @@ public class LiveSchedulesController {
         return ResponseEntity.ok(services.getListPonctuationUser(start, end,id));
     }
 
+    @GetMapping("/getTopPonctuactionPeriod/{start}/{end}")
+    @CrossOrigin("*")
+    public ResponseEntity<List<PonctuationDTOResponse>> getTopPonctuactionPeriod(@PathVariable long start, @PathVariable long end) {
+        return ResponseEntity.ok(services.getListTopStreamers(start, end));
+    }
 }
